@@ -39,5 +39,22 @@ class SlashCommands :ListenerAdapter(){
             channelListWriter.flush()
             channelListWriter.close()
         }
+
+        if(event.name == "ranking_upper") {
+
+        }
+
+        if(event.name == "ranking_lower") {
+
+        }
+    }
+
+    fun ranking() {
+        val path = "user/"
+        val list = File(path).list()!!
+        var username = ""
+        list.forEach { userid ->
+            username = Main().jda.getUserById(userid).toString()
+        }
     }
 }

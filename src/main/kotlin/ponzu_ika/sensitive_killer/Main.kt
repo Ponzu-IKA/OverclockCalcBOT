@@ -10,11 +10,11 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.requests.GatewayIntent
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.function.UnaryOperator
 
 
 class Main : ListenerAdapter() {
     private lateinit var receivedMessage:String
-    private lateinit var retruned:String
     lateinit var guild:Guild
     lateinit var jda: JDA
     fun main(token:String, guild_id:String) {
@@ -50,15 +50,33 @@ class Main : ListenerAdapter() {
         //受け取ったメッセージをreceivedMessageに代入
         receivedMessage = event.message.contentDisplay
         //SensitiveKillerからreturnされた文章をretrunedに代入
-        retruned = SensitiveKiller().sensitiveKiller(receivedMessage)
+        val retruned = SensitiveKiller().sensitiveKiller(receivedMessage)
+        val returnedStr = retruned.first
+        val returnedInt = retruned.second
+
+        val user_id = event.author.id
+        val path = "user/$user_id"
+        if(!File(path).isFile)
+            File(path).createNewFile()
+
+
+        var inrandoReader = File(path).readText().toIntOrNull()
+        val inrandoWriter = writer(path)
+
+        if(inrandoReader==null)
+            inrandoReader = 0
+
+        inrandoWriter.append("${inrandoReader + returnedInt}")
+        inrandoWriter.flush()
+        inrandoWriter.close()
+
         //アスタリスク(太字に用いている)があれば返信する。無ければそのまま終了
-        if (retruned.contains("*")){
+        if (returnedStr.contains("*")){
             event.message.addReaction(Emoji.fromUnicode("\uD83D\uDE93")).queue()
-            event.message.reply(retruned).queue {message ->
-                message.delete().queueAfter(3,TimeUnit.SECONDS)
+            event.message.reply("$returnedStr\n${returnedInt}単語が禁制文字です。").queue {message ->
+                message.delete().queueAfter(5,TimeUnit.SECONDS)
             }
         }
-
     }
 
 }
