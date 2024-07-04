@@ -1,4 +1,4 @@
-package ponzu_ika.sensitive_killer
+package ponzu_ika.occalc
 
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
