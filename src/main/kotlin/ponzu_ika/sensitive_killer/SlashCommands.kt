@@ -1,60 +1,51 @@
 package ponzu_ika.sensitive_killer
 
+import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import java.io.File
+import java.awt.Color
+import kotlin.math.pow
+import kotlin.math.round
+import kotlin.math.roundToInt
 
 class SlashCommands :ListenerAdapter(){
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
-        val guildid = event.guild?.id!!
-        if(event.name == "toggle_channel") {
-            if(!File(guildid).isFile)
-                File(guildid).createNewFile()
-            val channelList = reader(guildid)
-            val channelListWriter = writer(guildid)
 
-            println()
-            val id = event.channelId
-            val name = event.channel
-
-            if(id==null) {
-                event.reply("ChannelIDの取得に失敗しました").queue()
-                return
-            }
-
-            if(channelList.contains(id)) {
-                channelList.remove(id)
-                println("$name を除外リストから削除")
-                event.reply("$name で実行可能にしました。").queue()
-            } else {
-                channelList.add(id)
-                println("$name を除外リストに追加")
-                event.reply("$name で実行不能にしました。").queue()
-            }
-
-            channelList.forEach {
-                channelListWriter.appendLine(it)
-            }
-            channelListWriter.flush()
-            channelListWriter.close()
-        }
-
-        if(event.name == "ranking_upper") {
-
-        }
-
-        if(event.name == "ranking_lower") {
-
+        if(event.name == "oc") {
+            event.replyEmbeds(
+                voltageCalc(
+                    event.getOption("voltage")!!.asInt,
+                    event.getOption("time")!!.asDouble,
+                    if (event.getOption("istick") == null) false else event.getOption("istick")!!.asBoolean
+                )
+            ).queue()
         }
     }
 
-    fun ranking() {
-        val path = "user/"
-        val list = File(path).list()!!
-        var username = ""
-        list.forEach { userid ->
-            username = Main().jda.getUserById(userid).toString()
+    fun voltageCalc(inputVoltage:Int, inputTime:Double, isTick:Boolean = false): MessageEmbed {
+        val eb = EmbedBuilder()
+
+        val time = if(isTick) inputTime/20 else inputTime
+
+        eb.setColor(Color.CYAN)
+
+        eb.setDescription("TotalEnergy: ${(time*inputVoltage*20).roundToInt()}EU")
+
+        val tier: ArrayList<String> = arrayListOf("ULV","LV","MV","HV","EV","IV","LuV","ZPM","UV","UHV","UEV","UIV","UXV","OpV","MAX")
+        var loop = 1
+
+        for (i in 1..tier.size) {
+            val voltage = 4.0.pow(i).toLong()*2
+            if(inputVoltage <= voltage && voltage < inputVoltage*4)
+                eb.setTitle("Voltage: ${tier[i-1]}(${inputVoltage}EU/t), Time: ${time}sec")
+            if (inputVoltage <= voltage && 0.5<=time/loop*20) {
+                eb.addField("${tier[i-1]} (${if(i < tier.size) voltage else Int.MAX_VALUE}EU/t)","${round(time/loop*100)/100}s (${(time/loop*20).roundToInt()}t)",false)
+                loop *= 2
+            }
         }
+
+        return eb.build()
     }
 }
