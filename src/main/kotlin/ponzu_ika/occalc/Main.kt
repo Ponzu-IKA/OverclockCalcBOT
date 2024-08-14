@@ -11,9 +11,9 @@ import java.io.File
 
 
 class Main : ListenerAdapter() {
-    lateinit var guild: Guild
-    lateinit var jda: JDA
-    fun main(token: String, guild_id: String) {
+    private lateinit var guild: Guild
+    private lateinit var jda: JDA
+    fun main(token: String, guildId: String) {
         //JDAのセットアップ。それ以上でも以下でもない。
         jda = JDABuilder.createDefault(
             token,
@@ -27,15 +27,17 @@ class Main : ListenerAdapter() {
         jda.awaitReady()
 
         //コマンド実装用。辛いので投げた
-        guild = jda.getGuildById(guild_id)!!
+        guild = jda.getGuildById(guildId)!!
 
         guild.updateCommands()
             .addCommands(
                 Commands.slash("oc", "オーバークロックの計算").addOption(OptionType.INTEGER, "voltage", "電圧", true)
                     .addOption(OptionType.NUMBER, "time", "処理時間", true)
-                    .addOption(OptionType.BOOLEAN, "istick", "処理時間をtickとして処理", false,)
-            )
-            .queue()
+                    .addOption(OptionType.BOOLEAN, "istick", "処理時間をtickとして処理", false,),
+                Commands.slash("forge", "TFCの鍛冶計算")
+                    .addOption(OptionType.INTEGER, "hammer", "赤い矢印が指す値", true)
+                    .addOption(OptionType.STRING, "sequence", "最後に打つ奴を入力(例: -3,7,-15)", true)
+            ).queue()
     }
 }
 //"1252613009076125738"
