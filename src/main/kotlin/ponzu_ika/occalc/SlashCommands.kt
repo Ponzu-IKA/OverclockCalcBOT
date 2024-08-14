@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import okhttp3.internal.wait
 import java.awt.Color
 import kotlin.math.pow
 import kotlin.math.round
@@ -46,7 +45,6 @@ class SlashCommands :ListenerAdapter(){
         }
 
         //CYAN AQUA GREEN YELLOW BLUE PURPLE ORANGE RED
-        val hammerOrder = mutableListOf(0,0,0,0,0,0,0,0)
         val hammerValueCalc = hammerValue - inputSequence.sum()
 
         val hammer = mutableListOf(16,13,7,2)
